@@ -7,12 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
 
 import com.retailer.rewards.entity.Transaction;
 import com.retailer.rewards.model.Rewards;
-import com.retailer.rewards.repository.TransactionRepository;
 import com.retailer.rewards.service.RewardsService;
+import com.retailer.rewards.exception.ResourceNotFoundException;
 
 import java.util.Arrays;
 
@@ -21,9 +20,6 @@ public class RewardsControllerTest {
 
     @Mock
     private RewardsService rewardsService;
-
-    @Mock
-    private TransactionRepository transactionRepository;
 
     @InjectMocks
     private RewardsController rewardsController;
@@ -41,6 +37,34 @@ public class RewardsControllerTest {
     }
 
     @Test
+    public void testCalculateRewardPerMonth_InvalidCustomer() {
+        int customerId = -1;
+        int month = 1;
+        int year = 2023;
+        when(rewardsService.calculateRewardsPerMonth(customerId, month, year)).thenThrow(new ResourceNotFoundException("Customer not found"));
+
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+            rewardsController.calculateRewardPerMonth(customerId, month, year);
+        });
+
+        assertEquals("Customer not found", exception.getMessage());
+    }
+
+    @Test
+    public void testCalculateRewardPerMonth_InvalidMonth() {
+        int customerId = 1;
+        int month = 13; // Invalid month
+        int year = 2023;
+        when(rewardsService.calculateRewardsPerMonth(customerId, month, year)).thenThrow(new IllegalArgumentException("Invalid month"));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            rewardsController.calculateRewardPerMonth(customerId, month, year);
+        });
+
+        assertEquals("Invalid month", exception.getMessage());
+    }
+
+    @Test
     public void testGetCustomerTotalPoints() {
         int customerId = 1;
         Rewards rewards = new Rewards(customerId, 100L, Arrays.asList(new Transaction()));
@@ -51,12 +75,14 @@ public class RewardsControllerTest {
     }
 
     @Test
-    public void testAddTransaction() {
-        Transaction transaction = new Transaction();
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+    public void testGetCustomerTotalPoints_InvalidCustomer() {
+        int customerId = -1;
+        when(rewardsService.calculateTotalPoints(customerId)).thenThrow(new ResourceNotFoundException("Customer not found"));
 
-        ResponseEntity<Object> result = rewardsController.addTransaction(transaction);
-        assertNotNull(result);
-        assertEquals(ResponseEntity.ok().build(), result);
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+            rewardsController.getCustomerTotalPoints(customerId);
+        });
+
+        assertEquals("Customer not found", exception.getMessage());
     }
 }

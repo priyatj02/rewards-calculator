@@ -1,5 +1,4 @@
-```markdown
-# Rewards Points Calculator
+# Rewards Service API
 
 ## Table of Contents
 - [Overview](#overview)
@@ -76,7 +75,38 @@ Given a record of every transaction during a three month period, calculate the r
   - `year` (required)
 - **Response:** `Rewards` object
 
+Example:
+**Endpoint:** `GET /calculateRewardPerMonth`
 
+**Request:**
+```json
+{
+  "customerId": 1,
+  "month": 1,
+  "year": 2025
+}
+```
+**Response:**
+```json
+{
+  "customerId": 1,
+  "totalRewards": 100,
+  "transactions": [
+    {
+      "transactionId": 1,
+      "customerId": 1,
+      "transactionDate": "2025-02-15T00:00:00",
+      "transactionAmount": 130
+    },
+    {
+      "transactionId": 2,
+      "customerId": 1,
+      "transactionDate": "2025-01-15T00:00:00",
+      "transactionAmount": 80
+    }
+  ]
+}
+```
 
 ### Get Customer Total Points
 - **URL:** `/CalculateReward/totalPoints`
@@ -85,14 +115,35 @@ Given a record of every transaction during a three month period, calculate the r
   - `customerId` (required)
 - **Response:** `Rewards` object
 
+Endpoint: GET /customerTotalPoints
 
-### Add Transaction
-- **URL:** `/CalculateReward/transactions`
-- **Method:** `POST`
-- **Request Body:** `Transaction` object
-- **Response:** `ResponseEntity<Object>`
-
-
+**Request:**
+```json
+    {
+      "customerId": 1
+    }
+```
+**Response:**
+```json
+{
+    "customerId": 1,
+    "totalRewards": 140,
+    "transactions": [
+      {
+        "transactionId": 1,
+        "customerId": 1,
+        "transactionDate": "2025-02-15T00:00:00",
+        "transactionAmount": 130
+      },
+      {
+        "transactionId": 2,
+        "customerId": 1,
+        "transactionDate": "2025-01-15T00:00:00",
+        "transactionAmount": 80
+      }
+    ]
+}
+```
 
 ## Running Tests
 To run the tests, use the following command:

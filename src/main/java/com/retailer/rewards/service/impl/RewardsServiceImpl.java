@@ -1,10 +1,8 @@
 package com.retailer.rewards.service.impl;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.retailer.rewards.exception.ResourceNotFoundException;
 import com.retailer.rewards.service.RewardsService;
@@ -37,17 +35,30 @@ public class RewardsServiceImpl implements RewardsService {
 	 */
 	@Override
 	public Rewards calculateRewardsPerMonth(long customerId, int month, int year) {
+		if(month < 1 || month > 12) {
+			log.error("Invalid month: {}", month);
+			throw new IllegalArgumentException("Invalid month");
+		}
 		Timestamp startTimestamp = Timestamp.valueOf(LocalDateTime.of(year, month, 1, 0, 0));
-		Timestamp endTimestamp = Timestamp.valueOf(LocalDateTime.of(year, month + 1, 1, 0, 0));
+		Timestamp endTimestamp;
+		if(month == 12){
+			endTimestamp = Timestamp.valueOf(LocalDateTime.of(year, 12, 31, 12, 12));
+		}
+		else {
+			endTimestamp = Timestamp.valueOf(LocalDateTime.of(year, month + 1, 1, 0, 0));
+		}
 		List<Transaction> transactions = transactionRepository.findAllByCustomerIdAndTransactionDateBetween(customerId, startTimestamp, endTimestamp);
-		if (transactions.isEmpty()) {
+		if (transactions == null || transactions.isEmpty()) {
 			log.warn("Customer ID or Transactions not found for customer ID: {}", customerId);
-			throw new ResourceNotFoundException("Transactions not found for customer ID: " + customerId);
+			throw new ResourceNotFoundException("Customer ID or Transactions not found for customer ID: " + customerId);
 		}
 		log.info("Customer ID or Transactions made by customer {} are : {}", customerId, transactions);
-		long reward = transactions.stream().map(transaction -> calculateRewards(transaction)).mapToLong(r -> r).sum();
-		Rewards rewards = new Rewards(customerId, reward, transactions);
-		return rewards;
+		long totalRewards = transactions.stream()
+				.mapToLong(this::calculateRewards)
+				.sum();
+
+		return new Rewards(customerId, totalRewards, transactions);
+
 	}
 
 	/**
@@ -59,13 +70,17 @@ public class RewardsServiceImpl implements RewardsService {
 	@Override
 	public Rewards calculateTotalPoints(long customerId) {
 		List<Transaction> transactions = transactionRepository.findAllByCustomerId(customerId);
-		if (transactions.isEmpty()) {
+		if (transactions == null || transactions.isEmpty()) {
 			log.warn("Customer ID or Transactions not found for customer ID: {}", customerId);
 			throw new ResourceNotFoundException("Customer ID or Transactions not found for customer ID: " + customerId);
 		}
-		long reward = transactions.stream().map(transaction -> calculateRewards(transaction)).mapToLong(r -> r).sum();
-		Rewards rewards = new Rewards(customerId, reward, transactions);
-		return rewards;
+
+		long totalRewards = transactions.stream()
+				.mapToLong(this::calculateRewards)
+				.sum();
+
+		return new Rewards(customerId, totalRewards, transactions);
+
 	}
 
 	/**
