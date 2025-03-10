@@ -1,6 +1,7 @@
 package com.retailer.rewards.service;
 
-import com.retailer.rewards.model.Rewards;
+import com.retailer.rewards.model.RewardsPerMonth;
+import com.retailer.rewards.model.TotalRewards;
 
 /**
  * Service interface for calculating rewards.
@@ -15,7 +16,7 @@ public interface RewardsService {
      * @param year the year
      * @return the rewards
      */
-    Rewards calculateRewardsPerMonth(long customerId, int month, int year);
+    RewardsPerMonth calculateRewardsPerMonth(long customerId, int month, int year);
 
     /**
      * Calculates total points for a customer.
@@ -23,5 +24,5 @@ public interface RewardsService {
      * @param customerId the customer ID
      * @return the rewards
      */
-    Rewards calculateTotalPoints(long customerId);
+    TotalRewards calculateTotalPoints(long customerId);
 }

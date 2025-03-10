@@ -1,10 +1,12 @@
 package com.retailer.rewards.controller;
 
+
+import com.retailer.rewards.model.RewardsPerMonth;
+import com.retailer.rewards.model.TotalRewards;
+import com.retailer.rewards.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import com.retailer.rewards.model.Rewards;
 import com.retailer.rewards.service.RewardsService;
 
 /**
@@ -27,9 +29,9 @@ public class RewardsController {
      * @return the rewards
      */
     @GetMapping(value = "/perMonth")
-    public Rewards calculateRewardPerMonth(@RequestParam int customerId, @RequestParam int month, @RequestParam int year) {
+    public RewardsPerMonth calculateRewardPerMonth(@RequestParam int customerId, @RequestParam int month, @RequestParam int year) {
         log.info("Calculating rewards for customer ID: {}, month: {}, year: {}", customerId, month, year);
-        Rewards rewards = rewardsService.calculateRewardsPerMonth(customerId, month, year);
+        RewardsPerMonth rewards = rewardsService.calculateRewardsPerMonth(customerId, month, year);
         log.info("Rewards calculated successfully for customer ID: {}", customerId);
         return rewards;
     }
@@ -41,9 +43,9 @@ public class RewardsController {
      * @return the rewards
      */
     @GetMapping(value = "/customerTotalPoints")
-    public Rewards getCustomerTotalPoints(@RequestParam int customerId) {
+    public TotalRewards getCustomerTotalPoints(@RequestParam int customerId) {
         log.info("Fetching total points for customer ID: {}", customerId);
-        Rewards rewards = rewardsService.calculateTotalPoints(customerId);
+        TotalRewards rewards = rewardsService.calculateTotalPoints(customerId);
         log.info("Total points fetched successfully for customer ID: {}", customerId);
         return rewards;
     }

@@ -5,7 +5,8 @@ import static org.mockito.Mockito.*;
 
 import com.retailer.rewards.entity.Transaction;
 import com.retailer.rewards.exception.ResourceNotFoundException;
-import com.retailer.rewards.model.Rewards;
+import com.retailer.rewards.model.RewardsPerMonth;
+import com.retailer.rewards.model.TotalRewards;
 import com.retailer.rewards.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ public class RewardsServiceImplTest {
         when(transactionRepository.findAllByCustomerIdAndTransactionDateBetween(anyLong(), any(Timestamp.class), any(Timestamp.class)))
                 .thenReturn(perMonthTransactions);
 
-        Rewards rewards = rewardsService.calculateRewardsPerMonth(customerId, month, year);
+        RewardsPerMonth rewards = rewardsService.calculateRewardsPerMonth(customerId, month, year);
         assertNotNull(rewards);
         assertEquals(1L, rewards.getCustomerId());
         assertEquals(110L, rewards.getTotalRewards());
@@ -84,10 +85,15 @@ public class RewardsServiceImplTest {
         long customerId = 1L;
         when(transactionRepository.findAllByCustomerId(anyLong())).thenReturn(transactions);
 
-        Rewards rewards = rewardsService.calculateTotalPoints(customerId);
+        TotalRewards rewards = rewardsService.calculateTotalPoints(customerId);
         assertNotNull(rewards);
         assertEquals(1L, rewards.getCustomerId());
-        assertEquals(140L, rewards.getTotalRewards());
+        assertEquals(140L, rewards.getTotalRewards().get("Total_Rewards"));
+        assertEquals(2, rewards.getTransactions().size());
+        assertTrue(rewards.getTotalRewards().containsKey("JANUARY"));
+        assertTrue(rewards.getTotalRewards().containsKey("FEBRUARY"));
+        assertEquals(30L, rewards.getTotalRewards().get("JANUARY"));
+        assertEquals(110L, rewards.getTotalRewards().get("FEBRUARY"));
     }
 
     @Test

@@ -8,9 +8,8 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class Rewards {
+public class RewardsPerMonth {
     private long customerId;
     private long totalRewards;
     private List<Transaction> transactions;
-
 }

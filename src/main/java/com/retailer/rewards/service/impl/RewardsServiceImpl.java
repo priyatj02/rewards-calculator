@@ -3,8 +3,12 @@ package com.retailer.rewards.service.impl;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.retailer.rewards.exception.ResourceNotFoundException;
+import com.retailer.rewards.model.RewardsPerMonth;
+import com.retailer.rewards.model.TotalRewards;
 import com.retailer.rewards.service.RewardsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.retailer.rewards.constants.Constants;
 import com.retailer.rewards.entity.Transaction;
-import com.retailer.rewards.model.Rewards;
 import com.retailer.rewards.repository.TransactionRepository;
 
 /**
@@ -34,7 +37,7 @@ public class RewardsServiceImpl implements RewardsService {
 	 * @return the rewards
 	 */
 	@Override
-	public Rewards calculateRewardsPerMonth(long customerId, int month, int year) {
+	public RewardsPerMonth calculateRewardsPerMonth(long customerId, int month, int year) {
 		if(month < 1 || month > 12) {
 			log.error("Invalid month: {}", month);
 			throw new IllegalArgumentException("Invalid month");
@@ -57,7 +60,7 @@ public class RewardsServiceImpl implements RewardsService {
 				.mapToLong(this::calculateRewards)
 				.sum();
 
-		return new Rewards(customerId, totalRewards, transactions);
+		return new RewardsPerMonth(customerId, totalRewards, transactions);
 
 	}
 
@@ -68,19 +71,23 @@ public class RewardsServiceImpl implements RewardsService {
 	 * @return the rewards
 	 */
 	@Override
-	public Rewards calculateTotalPoints(long customerId) {
+	public TotalRewards calculateTotalPoints(long customerId) {
 		List<Transaction> transactions = transactionRepository.findAllByCustomerId(customerId);
 		if (transactions == null || transactions.isEmpty()) {
 			log.warn("Customer ID or Transactions not found for customer ID: {}", customerId);
 			throw new ResourceNotFoundException("Customer ID or Transactions not found for customer ID: " + customerId);
 		}
 
-		long totalRewards = transactions.stream()
-				.mapToLong(this::calculateRewards)
-				.sum();
+		Map<String, Long> totalRewards = transactions.stream()
+				.collect(Collectors.groupingBy(
+						t -> t.getTransactionDate().toLocalDateTime().getMonth().toString(),
+						Collectors.summingLong(this::calculateRewards)
+				));
 
-		return new Rewards(customerId, totalRewards, transactions);
+		long totalPoints = totalRewards.values().stream().mapToLong(Long::longValue).sum();
+		totalRewards.put("Total_Points", totalPoints);
 
+		return new TotalRewards(customerId, totalRewards, transactions);
 	}
 
 	/**

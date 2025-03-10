@@ -120,28 +120,38 @@ Endpoint: GET /customerTotalPoints
 **Request:**
 ```json
     {
-      "customerId": 1
+      "customerId": 2
     }
 ```
 **Response:**
 ```json
 {
-    "customerId": 1,
-    "totalRewards": 140,
-    "transactions": [
-      {
-        "transactionId": 1,
-        "customerId": 1,
-        "transactionDate": "2025-02-15T00:00:00",
-        "transactionAmount": 130
-      },
-      {
-        "transactionId": 2,
-        "customerId": 1,
-        "transactionDate": "2025-01-15T00:00:00",
-        "transactionAmount": 80
-      }
-    ]
+  "customerId": 2,
+  "totalRewards": {
+    "Total_Points": 290,
+    "FEBRUARY": 200,
+    "SEPTEMBER": 90
+  },
+  "transactions": [
+    {
+      "transactionId": 1003,
+      "customerId": 2,
+      "transactionDate": "2025-02-11T00:00:00.000+00:00",
+      "transactionAmount": 140.0
+    },
+    {
+      "transactionId": 1007,
+      "customerId": 2,
+      "transactionDate": "2025-02-15T00:00:00.000+00:00",
+      "transactionAmount": 110.0
+    },
+    {
+      "transactionId": 1009,
+      "customerId": 2,
+      "transactionDate": "2025-09-11T00:00:00.000+00:00",
+      "transactionAmount": 120.0
+    }
+  ]
 }
 ```
 
